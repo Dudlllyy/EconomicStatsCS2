@@ -23,8 +23,6 @@ To allow the program to read live match data, you need to add the GSI configurat
 Ensure you have Python installed (Python 3.6+ recommended).
 Run the script via terminal or command prompt:
 
-```bash
-python CS.py
 Usage
 
 After each round, the program will ask you:
@@ -53,3 +51,8 @@ __pycache__/
 .idea/
 .vscode/
 *.swp
+
+```bash
+python CS.py
+
+
