@@ -6,7 +6,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 manual_saves = 0
 last_processed_round = -1
 
-# Расширенное состояние игры (теперь с оценкой банка)
+
 game_state = {
     "t_score": 0, "ct_score": 0,
     "enemy": "CT", "bonus": 1400, "est_bank": 800,
@@ -15,9 +15,7 @@ game_state = {
 }
 
 
-# ==========================================
-# 1. ЛОГИКА СЕРВЕРА И СИМУЛЯЦИЯ ЭКОНОМИКИ
-# ==========================================
+
 class GSIServer(BaseHTTPRequestHandler):
     def do_POST(self):
         length = int(self.headers['Content-Length'])
@@ -52,7 +50,7 @@ class GSIServer(BaseHTTPRequestHandler):
 
             round_wins = data['map'].get('round_wins', {})
 
-            # --- ВНУТРЕННИЙ ДВИЖОК ЭКОНОМИКИ ---
+
             estimated_bank = 800
             loss_streak = 0
             last_winner_in_loop = None
@@ -61,30 +59,27 @@ class GSIServer(BaseHTTPRequestHandler):
             sorted_rounds = sorted([int(k) for k in round_wins.keys()])
 
             for r in sorted_rounds:
-                # Сброс на смене сторон или допах
+
                 if r == 13 or r == 25 or r == 31:
                     loss_streak = 0
                     estimated_bank = 800
                     last_winner_in_loop = None
 
-                # 1. ТРАТЫ ПЕРЕД РАУНДОМ
+
                 if r == 1 or r == 13 or r == 25:
-                    spend = 800  # Пистолетка
+                    spend = 800
                 else:
                     if last_winner_in_loop == game_state["enemy"]:
-                        # Если враг выиграл прошлый раунд, они выжили. Тратят только на гранаты/броню
                         spend = 1000
                     else:
-                        # Проиграли = нужно покупать заново
                         if estimated_bank >= 4500:
-                            spend = 4500  # Делают Фулл-бай
+                            spend = 4500
                         else:
-                            spend = 1000  # Эко или Форс
+                            spend = 1000
 
                 estimated_bank -= spend
                 if estimated_bank < 0: estimated_bank = 0
 
-                # 2. РЕЗУЛЬТАТ РАУНДА
                 win_event = round_wins[str(r)].lower()
                 last_event = win_event
 
@@ -97,30 +92,26 @@ class GSIServer(BaseHTTPRequestHandler):
 
                 game_state["eliminated"] = win_event.endswith('elimination')
 
-                # 3. НАЧИСЛЕНИЕ ДЕНЕГ
                 if round_winner != game_state["enemy"]:
-                    # Враг проиграл
                     loss_streak += 1
                     if loss_streak > 4: loss_streak = 4
                     income = 1400 + (loss_streak * 500)
 
-                    # ПРАВИЛО 1: БОНУС ЗА БОМБУ (+800$)
                     if game_state["enemy"] == "T" and win_event == "bombdefused":
                         income += 800
                 else:
-                    # Враг выиграл
+
                     loss_streak -= 1
                     if loss_streak < 0: loss_streak = 0
                     income = 3250
 
                 estimated_bank += income
 
-                # ПРАВИЛО 3: ПОТОЛОК ДЕНЕГ
+
                 if estimated_bank > 16000: estimated_bank = 16000
 
                 last_winner_in_loop = round_winner
 
-            # Сохраняем итоги симуляции для интерфейса
             game_state["est_bank"] = estimated_bank
             game_state["bonus"] = 1400 + (loss_streak * 500)
             game_state["last_winner"] = last_winner_in_loop
@@ -130,40 +121,39 @@ class GSIServer(BaseHTTPRequestHandler):
             recalculate_prediction()
 
 
-# --- ФУНКЦИЯ ПРОГНОЗА ---
+
 def recalculate_prediction():
     s = game_state
     bank = s["est_bank"]
-    save_text = f" (+{manual_saves} сейв)" if manual_saves > 0 else ""
+    save_text = f" (+{manual_saves} safe)" if manual_saves > 0 else ""
 
     if s["is_pistol"]:
-        pred, color = "ПИСТОЛЕТКА ($800)", "#00ffff"
+        pred, color = "PISTOL ROUND ($800)", "#00ffff"
     elif bank >= 4500:
         if s["last_winner"] != s["enemy"]:
-            # ПРАВИЛО 2: ЭФФЕКТ ПОДУШКИ БЕЗОПАСНОСТИ
-            pred, color = f"ФУЛЛ-БАЙ (Подушка: ~${bank})", "#00ff7f"
+            pred, color = f"FULLBUY (all money: ~${bank})", "#00ff7f"
         else:
-            pred, color = f"ФУЛЛ-БАЙ (Вин-стрик)", "#00ff7f"
+            pred, color = f"FULLBUY (Win streak)", "#00ff7f"
     elif bank >= 3000 and manual_saves >= 1:
-        pred, color = f"БАЙ (Банк ~${bank}{save_text})", "#00ff7f"
+        pred, color = f"DEFAULT BUY (Bank ~${bank}{save_text})", "#00ff7f"
     elif bank >= 2200:
         if s["bomb_bonus"]:
-            pred, color = f"ФОРС/БАЙ (Бонус за бомбу!)", "#ffd700"
+            pred, color = f"FORCE/BUY (bonus for bomb!)", "#ffd700"
         else:
-            pred, color = f"СЛАБЫЙ БАЙ (~${bank}{save_text})", "#ffd700"
+            pred, color = f"LOW BUY (~${bank}{save_text})", "#ffd700"
     else:
         if manual_saves >= 2:
-            pred, color = f"ФОРС{save_text}", "#ffd700"
+            pred, color = f"FORCE{save_text}", "#ffd700"
         elif s["eliminated"] and manual_saves == 0:
-            pred, color = f"ЧИСТОЕ ЭКО (~${bank})", "#ff4c4c"
+            pred, color = f"FULL ECO (~${bank})", "#ff4c4c"
         else:
-            pred, color = f"ЭКО / ФОРС (~${bank})", "#ff4c4c"
+            pred, color = f"ECO/FORCE (~${bank})", "#ff4c4c"
 
     def _update():
-        lbl_score.config(text=f"Счет: T [{s['t_score']}] - [{s['ct_score']}] CT")
-        lbl_enemy.config(text=f"Враг: {s['enemy']} | Луз-бонус: ${s['bonus']}")
+        lbl_score.config(text=f"Score: T [{s['t_score']}] - [{s['ct_score']}] CT")
+        lbl_enemy.config(text=f"Enemy: {s['enemy']} | Lose-bonus: ${s['bonus']}")
         lbl_pred.config(text=pred, fg=color)
-        lbl_saves.config(text=f"Сейвов: {manual_saves}")
+        lbl_saves.config(text=f"Safes: {manual_saves}")
 
     root.after(0, _update)
 
@@ -173,11 +163,8 @@ def run_server():
     server.serve_forever()
 
 
-# ==========================================
-# 2. ГРАФИЧЕСКИЙ ИНТЕРФЕЙС
-# ==========================================
 root = tk.Tk()
-root.title("CS2 Predictor PRO")
+root.title("CS2 Predictor")
 root.geometry("290x155")
 root.attributes("-topmost", True)
 root.overrideredirect(True)
@@ -204,7 +191,7 @@ btn_close = tk.Button(drag_frame, text="X", bg="#2a2a2a", fg="#ffffff", font=("A
                       bd=0, activebackground="#ff4c4c", command=root.quit)
 btn_close.pack(side="right", padx=5)
 
-lbl_score = tk.Label(root, text="Ожидание матча...", font=("Consolas", 11, "bold"), bg="#121212", fg="#aaaaaa")
+lbl_score = tk.Label(root, text="Waiting for game...", font=("Consolas", 11, "bold"), bg="#121212", fg="#aaaaaa")
 lbl_score.pack(pady=(5, 0))
 
 lbl_enemy = tk.Label(root, text="-", font=("Consolas", 10), bg="#121212", fg="#ffffff")
@@ -231,13 +218,13 @@ def rem_save():
 btn_frame = tk.Frame(root, bg="#121212")
 btn_frame.pack(pady=(10, 0))
 
-btn_minus = tk.Button(btn_frame, text="- Сейв", bg="#ff4c4c", fg="white", bd=0, width=8, command=rem_save)
+btn_minus = tk.Button(btn_frame, text="- Safe", bg="#ff4c4c", fg="white", bd=0, width=8, command=rem_save)
 btn_minus.pack(side="left", padx=5)
 
-lbl_saves = tk.Label(btn_frame, text="Сейвов: 0", font=("Consolas", 10), bg="#121212", fg="white")
+lbl_saves = tk.Label(btn_frame, text="Safes: 0", font=("Consolas", 10), bg="#121212", fg="white")
 lbl_saves.pack(side="left", padx=5)
 
-btn_plus = tk.Button(btn_frame, text="+ Сейв", bg="#00ff7f", fg="black", bd=0, width=8, command=add_save)
+btn_plus = tk.Button(btn_frame, text="+ Safe", bg="#00ff7f", fg="black", bd=0, width=8, command=add_save)
 btn_plus.pack(side="left", padx=5)
 
 threading.Thread(target=run_server, daemon=True).start()
