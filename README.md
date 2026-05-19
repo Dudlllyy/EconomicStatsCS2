@@ -23,35 +23,6 @@ To allow the program to read live match data, you need to add the GSI configurat
 Ensure you have Python installed (Python 3.6+ recommended).
 Run the script via terminal or command prompt:
 
-Usage
-
-After each round, the program will ask you:
-
-    Did the enemy team win? (y/n)
-
-    How many enemy players survived/saved? (0-5)
-
-    Was the bomb planted? (y/n - only if they lost the round)
-
-Based on this input, the tool will estimate their current balance and predict their buy for the next round.
-
-
----
-
-### 3. Файл игнорирования (`.gitignore`)
-Чтобы не засорять репозиторий кэшем Python.
-
-```text
-# Python cache
-__pycache__/
-*.py[cod]
-*$py.class
-
-# IDE configurations
-.idea/
-.vscode/
-*.swp
-
 ```bash
 python CS.py
 
