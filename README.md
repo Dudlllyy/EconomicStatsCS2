@@ -1,6 +1,6 @@
 # CS2 Economy Tracker
 
-Console-based Python application for tracking and predicting the enemy team's economy in Counter-Strike 2. 
+Console-based Python application for tracking and predicting the enemy team's economy in Counter-Strike 2.
 
 ## Features
 * **Loss Bonus Tracking:** Automatically calculates dynamic loss bonuses ($1400 to $3400).
@@ -9,21 +9,23 @@ Console-based Python application for tracking and predicting the enemy team's ec
 * **Bomb Plant Bonus:** Accounts for the $800 bonus when the losing team plants the bomb.
 
 ## Game State Integration Setup
-
 To allow the program to read live match data, you need to add the GSI configuration file to your CS2 directory:
 
 1. Locate your local CS2 game files.
 2. Copy the `gamestate_integration_economy.cfg` file from this repository.
-3. Paste it into the following directory:
+3. Paste it into the following directory: 
    `C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\game\csgo\cfg\`
    *(Note: Make sure to drop it in the `game\csgo\cfg` folder, NOT the old `csgo\cfg` folder)*
-4. Start the Python tracker script first, then launch CS2.
+4. Start the tracker script first, then launch CS2.
 
 ## How to Run
+
+**Option 1: The Executable File (For Convenience)**
+You can use the compiled `.exe` file to run the tracker directly. This is the most convenient way, as it does not require you to install Python or any dependencies. Just download the `.exe` and double-click to launch!
+
+**Option 2: From Source Code**
 Ensure you have Python installed (Python 3.6+ recommended).
 Run the script via terminal or command prompt:
 
 ```bash
 python CS.py
-
-
