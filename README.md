@@ -27,5 +27,19 @@ You can use the compiled `.exe` file to run the tracker directly. This is the mo
 Ensure you have Python installed (Python 3.6+ recommended).
 Run the script via terminal or command prompt:
 
+
+## Option 3: Web Version for Steam Overlay
+
+In addition to the standard console version, the project now includes a web-based script. It performs the exact same function — analyzing and predicting the enemy's economy — but outputs a clean interface to a local web page.
+
+**The main feature:** You can use it directly in-game via the Steam Overlay!
+    
+**How to use:**
+1. Run the web version Python script before your game. It will start a local server.
+2. During the match, open the Steam Overlay (usually `Shift + Tab`).
+3. Open the built-in Steam web browser.
+4. Go to `http://127.0.0.1:3000`.
+
+Now the economy tracker will always be right in front of you, eliminating the need to Alt-Tab out of CS2 or use a second monitor.
 ```bash
 python CS.py
