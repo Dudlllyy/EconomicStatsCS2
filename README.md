@@ -29,7 +29,7 @@ Run the script via terminal or command prompt:
 ```bash
 python CS on browser.py
 ```
-**Option 3: Web Version for Steam Overlay
+**Option 3: Web Version for Steam Overlay**
 
 In addition to the standard console version, the project now includes a web-based script. It performs the exact same function — analyzing and predicting the enemy's economy — but outputs a clean interface to a local web page.
 
