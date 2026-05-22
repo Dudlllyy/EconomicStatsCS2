@@ -27,7 +27,7 @@ You can use the compiled `.exe` file to run the tracker directly. This is the mo
 Ensure you have Python installed (Python 3.6+ recommended).
 Run the script via terminal or command prompt:
 ```bash
-python CS on browser.py
+python CS.py
 ```
 **Option 3: Web Version for Steam Overlay**
 
